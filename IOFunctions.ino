@@ -22,10 +22,12 @@ void setClock() {
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
 
   time_t nowSecs = time(nullptr);
-  while (nowSecs < 8 * 3600 * 2) {
+  int retries = 0;
+  while (nowSecs < 8 * 3600 * 2 && retries < 20) {
     delay(500);
     yield();
     nowSecs = time(nullptr);
+    retries++;
   }
   struct tm timeinfo;
   gmtime_r(&nowSecs, &timeinfo);

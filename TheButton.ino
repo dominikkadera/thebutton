@@ -53,6 +53,10 @@ void setup() {
   FastLED.addLeds<WS2812, LED_PIN, COLOR_ORDER>(button->ledStrip, NUM_LEDS);
   FastLED.setBrightness(LED_BRIGHTNESS);
   setStripColor(button->ledStrip, COLOR_CONNECTING);
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+  WiFi.setHostname("thebutton");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   for (int i = 0; i < WIFI_CONNECTION_CHECKS; i++) {
