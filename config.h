@@ -7,7 +7,8 @@
 #define STARTUP_SANITY_DELAY      2000
 #define BLINK_TIME                400
 #define COLOR_NONE                CRGB::Black
-#define COLOR_CONNECTING          CRGB::Lime
+#define COLOR_CONNECTING          CRGB::Yellow
+#define COLOR_INITIALIZING        CRGB::Cyan
 #define COLOR_SENDING             CRGB::Lime
 #define COLOR_CONNECTION_FAILED   CRGB::Red
 #define WIFI_CONNECTION_CHECKS    40   // max 40 * 250 = 10000 ms = 10 seconds timeout
