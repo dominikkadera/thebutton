@@ -3,49 +3,62 @@
 #include <FastLED.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 
 // Declare here, so it can be used where needed
-void setStripColor(CRGB * ledStrip, CRGB color);
+void setStripColor(CRGB *ledStrip, CRGB color);
 time_t getClock();
 
 class TheButton {
-  private:
-    boolean lastButtonState = false;
-    boolean debouncedButtonState = false;
-    unsigned long debounceTime = 0;
-    unsigned long limit = 0;
-    unsigned long blinkLimit = 0;
-    unsigned long buttonDownAt = 0;
-    unsigned long buttonReleasedAt = 0;
-    boolean buttonIsDown = false;
-    boolean blinkState = false;
-    boolean sendeeCandidate = false;
-    boolean abortRequest = false;
-    String sequence = "";
-    char currentPressChar = 0;
-    void sendRequest(String u) {
-      setStripColor(ledStrip, COLOR_SENDING);
-      if ((WiFi.status() == WL_CONNECTED)) {
+private:
+  boolean lastButtonState = false;
+  boolean debouncedButtonState = false;
+  unsigned long debounceTime = 0;
+  unsigned long limit = 0;
+  unsigned long blinkLimit = 0;
+  unsigned long buttonDownAt = 0;
+  unsigned long buttonReleasedAt = 0;
+  boolean buttonIsDown = false;
+  boolean blinkState = false;
+  boolean sendeeCandidate = false;
+  boolean abortRequest = false;
+  String sequence = "";
+  char currentPressChar = 0;
+  void sendRequest(String u) {
+    setStripColor(ledStrip, COLOR_SENDING);
+    if ((WiFi.status() == WL_CONNECTED)) {
+      WiFiClientSecure *client = new WiFiClientSecure;
+
+      if (client) {
+        client->setInsecure();
+
         HTTPClient http;
-        http.begin(u + (u.indexOf('?') == -1 ? "?" : "&") + "ts=" + getClock());
-        int code = http.GET();
-        if(code < 100 || code >= 400) {
-          setStripColor(ledStrip, COLOR_CONNECTION_FAILED);
-          delay(FAIL_NOTIFICATION_LENGTH);
+        String fullUrl = u + (u.indexOf('?') == -1 ? "?" : "&") + "ts=" + getClock();
+
+        if (http.begin(*client, fullUrl)) {
+          int code = http.GET();
+
+          if (code < 100 || code >= 400) {
+            setStripColor(ledStrip, COLOR_CONNECTION_FAILED);
+            delay(FAIL_NOTIFICATION_LENGTH);
+          }
+          http.end();
         }
-        http.end();
+
+        delete client;
       }
-      setStripColor(ledStrip, COLOR_NONE);
     }
-  public:
-    void readInput();
-    void onTick();
-    void onReleased();
-    void onPressed();
-    CRGB ledStrip[NUM_LEDS];
+    setStripColor(ledStrip, COLOR_NONE);
+  }
+public:
+  void readInput();
+  void onTick();
+  void onReleased();
+  void onPressed();
+  CRGB ledStrip[NUM_LEDS];
 };
 
-TheButton * button = new TheButton();
+TheButton *button = new TheButton();
 
 void setup() {
   // Serial.begin(115200);
